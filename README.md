@@ -10,7 +10,7 @@ The RGB555-to-RGB888 code was borrowed from [the mGBA emulator](https://github.c
 Just run `python readportraits.py <ROMNAME.gba>` and it'll generate a out.png file in the current directory.
 
 # Target ROM:
-It supports 3 different roms, but the output should be rom:
+It supports 3 different roms, but the output should be identical no matter the ROM:
 * JP ROM (1113), md5sum 3BAE05647BBEE8565E3993FADE2CA5BA. 
 * EU ROM (1407), md5sum 49AA688745111AAA51076A345F8F18C3. 
 * US ROM (1460), md5sum F4A655E23638E79EACF44A456FAEE6A4. 
