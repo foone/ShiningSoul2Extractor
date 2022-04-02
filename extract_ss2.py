@@ -10,6 +10,7 @@ def readN(f,n):
 	for i in range(n//2):
 		out.extend(list(read4(f)))
 	return out
+
 def readTile(f):
 	lines=[]
 	for y in range(8):
@@ -54,26 +55,30 @@ def loadPalette(f,offset):
 	return palette
 
 class ROM(object):
-	def __init__(self,code):
+	def __init__(self,code,font_base,num_chars,font_width):
 		self.code=code
+		self.font_base=font_base
+		self.num_chars=num_chars
+		self.font_width=font_width
 		self.offsets=[]
 	def add(self,palbase,portbase):
 		self.offsets.append((palbase,portbase))
 	def base(self, i):
 		return self.offsets[i]
 
-USROM=ROM('AU2E')
+
+USROM=ROM('AU2E',0x928e9c,89,8)
 USROM.add(0xC22858,0xC1E858)
 USROM.add(0xC26A58,0xC22A58)
 USROM.add(0xc972f8,0xC932F8)
 
-JPROM=ROM('AU2J')
+JPROM=ROM('AU2J',0x8D94E8,1791,16)
 JPROM.add(0xBFAEA4,0xBF6EA4)
 JPROM.add(0xBFF0A4,0xbfb0a4)
 JPROM.add(0xC6F944,0xC6B944)
 
 
-EUROM=ROM('AU2P')
+EUROM=ROM('AU2P',0x92C028,153,8)
 EUROM.add(0xC30014,0xC2C014)
 EUROM.add(0xC34214,0xC30214)
 EUROM.add(0xCA4AB4,0xCA0AB4)
@@ -98,12 +103,61 @@ def findROM(f):
 			return rom
 	print("Couldn't find a matching ROM for {}".format(code))
 	sys.exit(1)
+
+def loadLetter(f,offset,font_width):
+	letter=Image.new('RGBA',(font_width,16))
+	f.seek(offset)
+	# this could be done smarter. I'm not smart enough to do it right now
+	if font_width==8:
+		letter.paste(readTile(f),(0,0))
+		letter.paste(readTile(f),(0,8))
+	if font_width==16:
+		letter.paste(readTile(f),(0,0))
+		letter.paste(readTile(f),(8,0))
+		letter.paste(readTile(f),(0,8))
+		letter.paste(readTile(f),(8,8))
+
+	return letter
+
+def loadFontPalette():
+	global palette
+	palette=Image.new('RGBA',(16,1))
+	COLORS=[
+		(  0,156,165),
+		(255,255,230),
+		( 49, 57, 57),
+		(  8, 16, 25),
+		( 16,255,222),
+		(107,231,247),
+		( 66,189,214),
+		(239,148, 33),
+		(255,198, 99),
+		(214,222,198),
+		(255,115,  0),
+		(255,222,  0),
+		(107,123,148),
+		( 90,148,156),
+		(  0, 82, 82),
+		(123,255,  0)
+	]
+	for i in range(16):
+		palette.putpixel((i,0),COLORS[i])
+
+def loadFont(f,base_offset,num_letters,font_width):
+	loadFontPalette()
+	out=Image.new('RGBA',(num_letters*font_width,16))
+	for i in range(num_letters):
+		im=loadLetter(f,base_offset+i*128,font_width)
+		out.paste(im,(i*font_width,0))
+	return out
+
 if __name__=='__main__':
 	if len(sys.argv)<2:
-		print 'Usage: readportraits.py <foobar.gba>'
+		print 'Usage: extract_ss2.py <foobar.gba>'
 		sys.exit(1)
 	with open(sys.argv[1],'rb') as f:
 		rom=findROM(f)
+
 		for i in range(9):
 			loadIndexedPortrait(f,i,*rom.base(0))
 		for i in range(16):
@@ -116,3 +170,6 @@ if __name__=='__main__':
 		for porti,port in enumerate(ports):
 			out.paste(port,(32*(porti%16),64*(porti//16)))
 		out.save('out.png')
+
+		im=loadFont(f,rom.font_base,rom.num_chars,rom.font_width)
+		im.save('font.png')

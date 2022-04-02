@@ -1,13 +1,13 @@
 # ShiningSoul2Extractor
-A tool for pulling portraits out of Shining Soul II for the GBA
+A tool for pulling portraits and fonts out of Shining Soul II for the GBA
 
-This decodes the Dialogue portraits from the ROM into sensible images, attaching the proper palettes. It's slightly a mess because it was developed in a very iterative experimental way, but I'm committing it in case anyone else finds it useful. 
+This decodes the Dialogue portraits & fonts from the ROM into sensible images, attaching the proper palettes. It's slightly a mess because it was developed in a very iterative experimental way, but I'm committing it in case anyone else finds it useful. 
 
 The RGB555-to-RGB888 code was borrowed from [the mGBA emulator](https://github.com/mgba-emu/mgba), under the MPL 2.0 license. 
 
 # Usage:
 
-Just run `python readportraits.py <ROMNAME.gba>` and it'll generate a out.png file in the current directory.
+Just run `python extract_ss2.py <ROMNAME.gba>` and it'll generate out.png & font.png file in the current directory.
 
 # Target ROM:
 It supports 3 different roms, but the output should be identical no matter the ROM:
